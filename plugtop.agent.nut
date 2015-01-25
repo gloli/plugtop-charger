@@ -1,9 +1,9 @@
 // Twilio specifics for texting
 const TWILIO_URL = "https://api.twilio.com/2010-04-01";
-const TWILIO_SID = "AC026c50ec54694ee238be87d0235b0bc9";
-const TWILIO_AUTH = "fdc79c638bced48e2da4c28b182f909d";
-const TWILIO_NUM = "+16466814341";  // twilio number, send sms
-const PERS_NUM = "+16462588347";    // personal, receive sms
+const TWILIO_SID = "XXX";		// Twilio account ID goes here
+const TWILIO_AUTH = "XXX"; 		// Twilio authorization token goes here
+const TWILIO_NUM = "+1XXXXXXXXXX";  	// twilio number, send sms
+const PERS_NUM = "+1XXXXXXXXXX";    	// personal, receive sms
 
 // device types
 const LT = "laptop";
