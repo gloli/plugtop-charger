@@ -1,0 +1,46 @@
+PLUGTOP CHARGER
+-Gloria Li 2015
+
+This project uses the plugtop as a charger for my Macbook Pro, Android phone, and Windows Surface. The plugtop determines the device that's plugged in, collects samples while charging, and then shuts off when the device is fully charged. It also texts the user when it starts and when it completes. By monitoring the power and phase angle stats while sampling, the plugtop can determine what device it is charging and when charging is complete. The plugtop device code controls sampling and the button, while the agent controls texting and checking samples.
+
+In my configuration, there are 3 devices: "phone", "tablet", and "laptop". Each device and each state (uncharged vs. charged) registers a unique range of power and phase angle statistics. Therefore, the type of device determines the minimum power and phase angle numbers the plugtop must sample before it decides it's done charging. Samples are compared against 3 different parameters: device (phone/tablet/laptop), sampling information (power/phase angle), and charging state (charged/uncharged). An initial sample allows the plugtop to guess what device it's charging. Sampling then continues until the plugtop agent can match a sample to that device's "charged" sampling information, which means the device's battery is full.
+
+USAGE
+
+The plugtop should be paired to the IDE (https://ide.electricimp.com/ide) via BlinkUp before the program can run. The user's own Twilio constants, devices, and device power/phase angle statistics should be set up in the header of the agent code. Once the plugtop is connected and the right information is input, the program can then run from the IDE.
+
+Running the program will wake up the plugtop, and it will text the Twilio number provided. Pressing the button will then allow the plugtop to start charging and collect an initial sample. The agent uses this sample to guess the type of device and texts the user to confirm. If the user texts back, the type of device is updated. 
+
+After the initial sample, sampling continues once every 2 minutes - the device collects a sample, sends it to the agent, and the agent checks to see if the device type is fully charged. Once this happens, the plugtop will text the user that charging is complete, and shut off. However, as long as the plugtop stays plugged in, the program will continue running. Pushing the button will cause the plugtop to wake up and start charging a new device.
+
+REFERENCES
+
+This charger utilizes the provided power sensor class (PL7223) and the Twilio library (https://github.com/electricimp/reference/tree/master/webservices/twilio) to collect usage samples and send messages. Determining a full charge required knowing the average samples for each device, both while charging and full. 
+
+With a bit of research, I filled in the following chart for the average statistics of my 3 main devices in different states. These ballparked statistics become the constants in the agent code that determine whether a device is charged or uncharged.
+
+Averages
+ITEM		CHARGE		STATE	V		I		P		PF		PA		f
+None							121		0		0		0		90		59-60	
+
+My Macbook	not full 	awake	121		0		70-85	0		11-12	59-60
+My Macbook	not full	sleep	121		0		25-50	0		50-65	60
+My Macbook 	full		awake	121		0		19-30	0		59-65	59
+My Macbook	full		sleep	122		0		1-5		0		65-72	60
+
+My tablet 	not full 	awake	122		0		46		0		57		59
+My tablet 	not full 	sleep	122		0		14-29	0		60-61	59-60
+My tablet	full		awake	122		0		5-10	0		65-70	59
+My tablet 	full 		sleep	122		0		1-5		0		76		59-60
+
+My phone 	not full 	awake	122		0		6		0		55-60	60
+My phone 	not full	sleep	122		0		4		0		61-65	60
+My phone 	full		awake	122		0		0		0		90		60
+My phone	full		sleep	122		0		0		0		90		60
+
+These averages are mostly reliable, but depend on the state of charge as well. My laptop's power sample fluctuates much more than my other devices, sometimes to the point where a sample at 90% charge is indistinguishable from a 100% charge. My phone, in constrast, provided the most stable data.
+
+ANAMOLIES 
+
+The plugtop can generally guess what device it's charging, but certain states will cause it to assume a different device. Power usage varies for different individual devices, and even different stages of charging. As a result, statistics can overlap. A laptop that is close to full charge can register the same power range as a tablet at only half charge. Moreover, the flow of electricity can sometimes fluctuate, especially when the plugtop gathers its initial sample. Different devices are built with different batteries: most modern smartphones contain lithium ion batteries that maintain only a slight trickle charge once charging is complete, but laptop batteries are considerably larger and register more power fluctuations. My laptop proved challenging to pinpoint, since sleeping, percentage of charge, and level of activity all influenced sampling.
+
